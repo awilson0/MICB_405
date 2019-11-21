@@ -26,12 +26,20 @@ bac1 <- bac %>%
 
 tax <- bind_rows(arc1, bac1) %>% 
   select(-X2) %>% 
-  rename(`Bin ID` = "X1") %>% 
+  rename(`Bin Id` = "X1") %>% 
   mutate_if(is_character, funs(na_if(.,"")))
 
 # Sum rpkms and add column matching `Bin id`
 r2 <- rpkm %>% separate(Sequence_name, into = c("Bin", "num"), sep="(?<=SaanichInlet_10m_...)") %>% 
   group_by(Bin) %>% 
-  summarize(RPKM =  sum(RPKM)) 
+  summarize(RPKM =  sum(RPKM)) %>% 
+  mutate(Bin = gsub('m_', 'm.', Bin)) %>% 
+  rename(`Bin Id` = Bin)
 
+# Combine all data frames for plotting
+dat <- full_join(r2, tax, by = "Bin Id") %>% full_join(checkm, by = "Bin Id") %>% 
+  filter(!is.na(Domain))
 
+dat %>% 
+  ggplot(aes(x = Completeness, y = Contamination)) +
+  geom_point(aes(colour = Phylum, size = RPKM, shape = Domain))
