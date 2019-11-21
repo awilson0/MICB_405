@@ -64,9 +64,11 @@ dat$Phylum <- factor(dat$Phylum, levels = c("Actinobacteriota", "Bacteroidota", 
 contamination_plot <- ggplot(dat, aes(x = Completeness, y = Contamination)) +
   geom_point(aes(colour = Phylum, size = RPKM, shape = Domain))+
   scale_shape_manual(values = c(17, 16)) + 
-  geom_segment(aes(x=90,y=1.25,xend=100,yend=1.25)) +
-  geom_segment(aes(x=90,y=0,xend=90,yend=1.25))+
-  geom_segment(aes(x=100, y=0, xend = 100, yend = 1.25)) +
-  geom_segment(aes(x = 90, y=0, xend = 100, yend = 0))
+  geom_segment(aes(x=90,y=1.25,xend=100,yend=1.25), color = "red") +
+  geom_segment(aes(x=90,y=0,xend=90,yend=1.25), color = "red")+
+  geom_segment(aes(x=100, y=0, xend = 100, yend = 1.25), color = "red") +
+  geom_segment(aes(x = 90, y=0, xend = 100, yend = 0), color = "red") +
+  geom_hline(yintercept = 0) + geom_hline(yintercept = 1.25) +
+  geom_vline(xintercept = 90) + geom_vline(xintercept = 100)
 contamination_plot
 
