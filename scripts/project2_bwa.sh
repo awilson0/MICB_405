@@ -7,7 +7,7 @@ metatranscriptomes_dir='/projects/micb405/resources/project_2/2019/Metatranscrip
 
 
 #make index
-bwa index -p $out_dir/BWA_index /home/alo_mb19/high_qual_MAGs_all_genes.fna
+bwa index -p $out_dir/BWA_index /home/alo_mb19/high_qual_MAGs_all_genes.ffn #change fna->ffn
 echo "Done making index"
 
 array=($metatranscriptomes_dir/*_10m.qtrim.artifact.rRNA.clean.fastq*)
