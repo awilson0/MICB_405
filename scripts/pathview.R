@@ -4,7 +4,7 @@ library(pathview)
 library(RColorBrewer)
 library(knitr)
 
-data_path = "~/Desktop/MICB405/project2/MICB_405/data/files_for_pathview/"
+data_path = "../data/files_for_pathview/"
 
 # metabolic reconstruction
 ko <- read.table(paste(data_path,"SaanichInlet_MAGx_ORFs_ko.cleaned.txt",sep=""), sep="\t") %>% 
@@ -99,6 +99,6 @@ pv.out <- pathview(gene.data = pv_mat,
                    mid = list(gene = "#ffffbf"),
                    high = list(gene = "#fc8d59"),
                    species = "ko",
-                   pathway.id="00910",
-                   kegg.dir = "~/Desktop/MICB405/project2/")
+                   pathway.id="01200",
+                   kegg.dir = "../data")
 
