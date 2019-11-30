@@ -79,3 +79,11 @@ contamination_plot <- ggplot(dat, aes(x = Completeness, y = Contamination)) +
 
 contamination_plot
 
+# Zoomed in contamination vs. completion plot
+dat1 <- dat %>% filter(Completeness > 90) %>% filter(Contamination < 10)
+
+zoomplot <- ggplot(dat1, aes(x = Completeness, y = Contamination)) +
+  geom_point(aes(colour = Phylum, size = RPKM))+
+  scale_shape_manual(values = c(17, 16)) + 
+  theme_cowplot()
+zoomplot
