@@ -7,7 +7,7 @@ library(cowplot)
 library(KEGGREST)
 library(knitr)
 
-asetwd("~/micb_405/MICB_405/")
+setwd("~/micb_405/MICB_405/")
 checkm <- read_tsv("data/MetaBAT2_SaanichInlet_10m_min1500_checkM_stdout.tsv")
 arc <- read_tsv("data/gtdbtk.ar122.classification_pplacer.tsv", col_names = FALSE)
 bac <- read_tsv("data/gtdbtk.bac120.classification_pplacer.tsv", col_names = FALSE)
