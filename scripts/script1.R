@@ -5,6 +5,7 @@ library(tidyverse)
 library(pathview)
 library(cowplot)
 library(KEGGREST)
+library(knitr)
 
 asetwd("~/micb_405/MICB_405/")
 checkm <- read_tsv("data/MetaBAT2_SaanichInlet_10m_min1500_checkM_stdout.tsv")
@@ -45,6 +46,7 @@ r2 <- rpkm_g %>% separate(Sequence_name, into = c("Bin", "num"), sep="(?<=Saanic
 dat <- full_join(r2, tax, by = "Bin Id") %>% full_join(checkm, by = "Bin Id") %>% 
   filter(!is.na(Domain))
 
+## Andrew's code
 # Find most represented phyla
 top_phyla <- as.vector(table(tax$Phylum))
 names(top_phyla) <- names(table(tax$Phylum))
@@ -84,6 +86,7 @@ contamination_plot <- ggplot(dat, aes(x = Completeness, y = Contamination)) +
   guides(color = guide_legend(override.aes = list(size = 4)))
 
 contamination_plot
+## End Andrew's code
 
 # Zoomed in contamination vs. completion plot
 dat1 <- dat %>% filter(Completeness > 90) %>% filter(Contamination < 10)
@@ -180,5 +183,30 @@ oxbac <- filter(oxph, Class == "Bacteroidia") %>%
   distinct(Kegg_ID, .keep_all = TRUE) %>% 
   arrange(desc(RPKM))
 
+## Pathview stuff
 
+ko_rpkm <- alldat %>%
+  group_by(Class, Kegg_ID) %>% 
+   summarise(t_rpkm = sum(RPKM)) %>% 
+  spread(key = Class, value = t_rpkm)
 
+pv_mat <- dplyr::select(ko_rpkm, -Kegg_ID)
+rownames(pv_mat) <- ko_rpkm$Kegg_ID
+
+# Carbon fixation by prokaryotes pathview
+pv.cfix <- pathview(gene.data = pv_mat,
+                   limit = list(gene = c(0,10)),
+                   low = list(gene = "#91bfdb"),
+                   mid = list(gene = "#ffffbf"),
+                   high = list(gene = "#fc8d59"),
+                   species = "ko",
+                   pathway.id="00720")
+
+# Oxidative phosphorylation pathview
+pv.oxph <- pathview(gene.data = pv_mat,
+                    limit = list(gene = c(0,10)),
+                    low = list(gene = "#91bfdb"),
+                    mid = list(gene = "#ffffbf"),
+                    high = list(gene = "#fc8d59"),
+                    species = "ko",
+                    pathway.id="00190")
