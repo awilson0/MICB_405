@@ -1,5 +1,5 @@
 ## Scripts for MICB 405 Project 2
-## JJ Hum
+## JJ Hum, Andrew Wilson
 
 library(tidyverse)
 library(pathview)
