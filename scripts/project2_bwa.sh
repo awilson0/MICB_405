@@ -3,7 +3,7 @@
 
 mkdir /home/alo_mb19/BWA_output
 out_dir='/home/alo_mb19/BWA_output'
-MetaT_reads_dir='/projects/micb405/project2/SaanichInlet_10m/MetaT_reads'
+MetaT_reads_dir='/projects/micb405/resources/project_2/2019/SaanichInlet_10m/MetaT_reads'
 
 
 #make index
