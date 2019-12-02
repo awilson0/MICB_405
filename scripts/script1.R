@@ -76,11 +76,11 @@ contamination_plot <- ggplot(dat, aes(x = Completeness, y = Contamination)) +
   geom_point(aes(colour = Phylum, size = RPKM, shape = Domain))+
   scale_shape_manual(values = c(17, 16)) + 
   scale_colour_manual(values = color1) +
-  geom_hline(yintercept = 0) + geom_hline(yintercept = 1.25) +
+  geom_hline(yintercept = 0) + geom_hline(yintercept = 5) +
   geom_vline(xintercept = 90) + geom_vline(xintercept = 100)+
-  geom_segment(aes(x=90,y=1.25,xend=100,yend=1.25), color = "blue") +
-  geom_segment(aes(x=90,y=0,xend=90,yend=1.25), color = "blue")+
-  geom_segment(aes(x=100, y=0, xend = 100, yend = 1.25), color = "blue") +
+  geom_segment(aes(x=90,y=5,xend=100,yend=5), color = "blue") +
+  geom_segment(aes(x=90,y=0,xend=90,yend=5), color = "blue")+
+  geom_segment(aes(x=100, y=0, xend = 100, yend = 5), color = "blue") +
   geom_segment(aes(x = 90, y=0, xend = 100, yend = 0), color = "blue") +
   theme_cowplot() +
   guides(color = guide_legend(override.aes = list(size = 4)))
@@ -88,8 +88,8 @@ contamination_plot <- ggplot(dat, aes(x = Completeness, y = Contamination)) +
 contamination_plot
 ## End Andrew's code
 
-# Zoomed in contamination vs. completion plot
-dat1 <- dat %>% filter(Completeness > 90) %>% filter(Contamination < 10)
+# High quality contamination vs. completion plot
+dat1 <- dat %>% filter(Completeness > 90) %>% filter(Contamination < 5)
 
 zoomplot <- ggplot(dat1, aes(x = Completeness, y = Contamination)) +
   geom_point(aes(colour = Phylum, size = RPKM))+
@@ -162,28 +162,29 @@ cfplot <-
         panel.grid.major.y = element_line(color = "gray")) +
   guides(color = guide_legend(override.aes = list(size = 4)))
 cfplot
-  
-# Looking at oxidative phosphorylation pathway
-oxph <- alldat %>% filter(Path == "path:map00190")
 
-oxplot2 <- 
-  ggplot(oxph, aes(y = Gene, x = Class, color = Phylum)) +
+topcf <- cfix %>% 
+  group_by(Class) %>% 
+  summarize(RPKM =  sum(RPKM))
+
+# Looking at Calvin cycle pathway
+cph <- alldat %>% filter(Path == "path:map00710")
+
+cphplot <- 
+  ggplot(cph, aes(y = Gene, x = Class, color = Phylum)) +
   geom_point(aes(size = RPKM)) +
   theme_cowplot() +
   theme(axis.text.x = element_text(angle = 20, hjust = 1),
         panel.grid.major.y = element_line(color = "gray")) +
   guides(color = guide_legend(override.aes = list(size = 4)))
-oxplot2
+cphplot
 
-# Top 10 oxphos genes
-oxkeggs <- arrange(oxph, desc(RPKM)) %>%
-  distinct(Kegg_ID, .keep_all = TRUE) %>% slice(1:10)
+topcph <- cph %>% 
+  group_by(Class) %>% 
+  summarize(RPKM =  sum(RPKM))
+  
 
-oxbac <- filter(oxph, Class == "Bacteroidia") %>% 
-  distinct(Kegg_ID, .keep_all = TRUE) %>% 
-  arrange(desc(RPKM))
-
-## Pathview stuff
+## Pathview visualization
 
 ko_rpkm <- alldat %>%
   group_by(Class, Kegg_ID) %>% 
@@ -202,11 +203,45 @@ pv.cfix <- pathview(gene.data = pv_mat,
                    species = "ko",
                    pathway.id="00720")
 
-# Oxidative phosphorylation pathview
-pv.oxph <- pathview(gene.data = pv_mat,
+# Looking at interesting spots
+cf1 <- alldat %>% filter(num == "ec:1.2.7.4") %>% distinct(Class, .keep_all = TRUE)
+cf2 <- alldat %>% filter(num == "ec:2.3.1.169") %>% distinct(Class, .keep_all = TRUE)
+
+# Looking for epsilon-proteobacteria
+table(dat$Class)
+
+# Carbon fixation by photosynthetes pathview
+pv.cpho <- pathview(gene.data = pv_mat,
                     limit = list(gene = c(0,10)),
                     low = list(gene = "#91bfdb"),
                     mid = list(gene = "#ffffbf"),
                     high = list(gene = "#fc8d59"),
                     species = "ko",
-                    pathway.id="00190")
+                    pathway.id="00710")
+
+# Interesting enzymes
+cp1 <- alldat %>% filter(num == "ec:2.7.1.19") %>% distinct(Class, .keep_all = TRUE)
+cp2 <- alldat %>% filter(num == "ec:4.1.1.39") %>% distinct(Class, .keep_all = TRUE)
+
+## Plotting geochemical data
+geodata <- read_csv("data/Saanich_TimeSeries_Chemical_Data.txt")
+
+g2 <- geodata %>% 
+  select(Cruise, Date, Depth, Mean_O2, Mean_H2S, 
+         Mean_co2, Mean_CH4, Mean_N2, Mean_NH4, Mean_NO2) %>% 
+  rename("Mean CH4" = Mean_CH4, "Mean CO2" = Mean_co2, "Mean H2S" = Mean_H2S,
+         "Mean N2" = Mean_N2, "Mean NH4" = Mean_NH4,
+         "Mean NO2" = Mean_NO2, "Mean O2" = Mean_O2) %>% 
+  gather(key="Chemical", value="Concentration", -Cruise, -Date, -Depth) 
+
+geoplot <-
+ggplot(g2, aes(x=Concentration, y=Depth)) +
+  geom_point(aes(colour=Chemical)) +
+  scale_y_reverse(limits=c(200,0)) +
+  facet_wrap(~Chemical, scales="free_x", nrow = 2) +
+  xlab("Concentration, uM") + ylab("Depth, m") +
+  theme_cowplot() +
+  theme(legend.position = "none", 
+        panel.grid.major = element_line(color = "gray"),
+        panel.spacing = unit(1.5, "lines"))
+geoplot
