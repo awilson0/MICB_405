@@ -1,5 +1,5 @@
 ## Scripts for MICB 405 Project 2
-## JJ Hum
+## JJ Hum, Andrew Wilson
 
 library(tidyverse)
 library(pathview)
@@ -7,14 +7,14 @@ library(cowplot)
 library(KEGGREST)
 library(knitr)
 
-asetwd("~/micb_405/MICB_405/")
+setwd("~/micb_405/MICB_405/")
 checkm <- read_tsv("data/MetaBAT2_SaanichInlet_10m_min1500_checkM_stdout.tsv")
 arc <- read_tsv("data/gtdbtk.ar122.classification_pplacer.tsv", col_names = FALSE)
 bac <- read_tsv("data/gtdbtk.bac120.classification_pplacer.tsv", col_names = FALSE)
 rpkm_g <- read_csv("data/SaanichInlet_10m_binned.rpkm.csv")
-rpkm_t <- read_csv("data/SI072_SaanichInlet_MAG_ORFs.sam_RPKM.csv", col_names = FALSE)
+rpkm_t <- read_csv("data/files_for_pathview/SI072_SaanichInlet_MAG_ORFs.sam_RPKM.csv", col_names = FALSE)
 prk <- read_csv("data/Prokka_MAG_map.csv", col_names = FALSE)
-ko <- read_tsv("data/SaanichInlet_MAGx_ORFs_ko.cleaned.txt", col_names = FALSE)
+ko <- read_tsv("data/files_for_pathview/SaanichInlet_MAGx_ORFs_ko.cleaned.txt", col_names = FALSE)
 
 # Separate out taxonomy info, combine into 1 dataframe
 a1 <- arc$X2
@@ -117,7 +117,7 @@ all <- left_join(ko1, rpkm_t2, by = "ORF") %>%
   left_join(prk1, by = "Prokka_Id") %>% 
   left_join(tax, by = "Bin Id") %>% 
   left_join(checkm, by = "Bin Id") %>% 
-  select(-"Marker lineage", -"# genomes", -"# markers", -"# marker sets", 
+  dplyr::select(-"Marker lineage", -"# genomes", -"# markers", -"# marker sets", 
          -"0", -"1", -"2", -"3", -"4", -"5+", -"Strain heterogeneity")
 
 # Get KEGGREST lookups and reformat into tables with proper headings
@@ -126,12 +126,12 @@ zym1 <- keggList("enzyme")
 paths <-keggLink("enzyme", "pathway")
 
 enzymes <- enframe(zyms) %>% 
-  rename("Kegg_ID" = "name", "num" = "value") %>% 
+  dplyr::rename("Kegg_ID" = "name", "num" = "value") %>% 
   mutate(Kegg_ID = gsub('ko:K', 'K', Kegg_ID)) 
 zym2 <- enframe(zym1) %>% 
-  rename("num" = "name", "Enzyme" = "value") %>% 
+  dplyr::rename("num" = "name", "Enzyme" = "value") %>% 
   separate(Enzyme, sep = ";", into = c("Enzyme", "Enzyme2"), extra = "merge")
-pathways <- enframe(paths) %>% rename("Path" = "name", "num" = "value")
+pathways <- enframe(paths) %>% dplyr::rename("Path" = "name", "num" = "value")
 
 # Get gene names by uploading KO list to KEGG mapper
 # Copy pasted list of genes "names.csv"
@@ -179,6 +179,7 @@ cphplot <-
   theme(axis.text.x = element_text(angle = 20, hjust = 1),
         panel.grid.major.y = element_line(color = "gray")) +
   guides(color = guide_legend(override.aes = list(size = 4)))
+
 cphplot
 
 topcph <- cph %>% 
