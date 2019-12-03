@@ -89,7 +89,9 @@ contamination_plot
 ## End Andrew's code
 
 # High quality contamination vs. completion plot
-dat1 <- dat %>% filter(Completeness > 90) %>% filter(Contamination < 5)
+dat1 <- dat %>% filter(Completeness > 90) %>% filter(Contamination < 5) %>% 
+  # Put Phylum name back after it was overwritten with other for the larger plot
+  mutate(Phylum = gsub("Other", "Desulfobacterota", Phylum))
 
 zoomplot <- ggplot(dat1, aes(x = Completeness, y = Contamination)) +
   geom_point(aes(colour = Phylum, size = RPKM))+
